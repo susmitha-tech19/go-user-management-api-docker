@@ -1,0 +1,46 @@
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: user-management-api
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: user-management-api
+
+  template:
+    metadata:
+      labels:
+        app: user-management-api
+
+    spec:
+      containers:
+        - name: user-management-api
+          image: user-management-api:v1
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-management-secret
+                  key: POSTGRES_PASSWORD
+
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: user-management-secret
+                  key: JWT_SECRET
+
+            - name: PORT
+              value: "8080"
+
+            - name: DATABASE_URL
+              value: "postgres://appuser:$(POSTGRES_PASSWORD)@postgres:5432/userdb?sslmode=disable"
